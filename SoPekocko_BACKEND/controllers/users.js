@@ -35,13 +35,13 @@ exports.loginUser = (req, res, next) => {
         bcrypt.compare(req.body.password, user.password)
         .then(valid => {
             if (!valid) {
-                return res.status(401).json({error: "Mode de passe incorrect!"});
+                return res.status(404).json({error: "Mode de passe incorrect!"});
             }
             res.status(200).json({
                 userId: user._id,
                 token: jwt.sign(
                     { userId: user._id },
-                    'SO_PEKOCKO_TOKEN',
+                    process.env.TOKEN,
                     { expiresIn: '24h' }
                     )
                 });

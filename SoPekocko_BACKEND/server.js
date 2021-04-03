@@ -1,3 +1,4 @@
+require('dotenv').config();
 const http = require('http');
 const app = require('./app');
 
@@ -20,7 +21,7 @@ const errorHandler = error => {
         throw error;
     }
     const address = server.address();
-    const bind = typeof address === 'string' ? 'pipe ' + address : 'port: ' + port;
+    const bind = typeof address === 'string' ? 'voie ' + address : 'port: ' + port;
     switch (error.code) {
         case 'EACCES':
         console.error(bind + ' nécessite des privilèges élevés.');
@@ -40,7 +41,7 @@ const server = http.createServer(app);
 server.on('error', errorHandler);
 server.on('listening', () => {
     const address = server.address();
-    const bind = typeof address === 'string' ? 'pipe ' + address : 'port ' + port;
+    const bind = typeof address === 'string' ? 'voie ' + address : 'port ' + port;
     console.log(`Écoute du ${bind} !`);
 });
 

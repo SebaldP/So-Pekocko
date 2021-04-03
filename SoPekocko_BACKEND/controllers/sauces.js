@@ -39,7 +39,7 @@ exports.createSauce = (req, res, next) => {
 };
 
 exports.modifySauce = (req, res, next) => {
-    const sauceObject = {};
+    let sauceObject = {};
     if (req.file) {
         Sauce.findOne({
             _id: req.params.id
@@ -100,7 +100,7 @@ exports.markSauce = (req, res, next) => {
     if (like === 0) {
         Sauce.findOne({ _id: sauceId })
             .then(sauce => {
-                if (sauce.usersDisliked.find(user => user === req.body.userId)) { // si le tableau userDisliked contient l'id de l'utilisateur, et l'utilisateur veut annuler son dislike
+                if (sauce.usersDisliked.includes(userId)) { // si le tableau userDisliked contient l'id de l'utilisateur, et l'utilisateur veut annuler son dislike
                     Sauce.updateOne({
                         _id: sauceId }, {
                         $pull: { usersDisliked: userId },
@@ -109,7 +109,7 @@ exports.markSauce = (req, res, next) => {
                         .then((sauce) => { res.status(200).json({ message: "Un utilisateur a annulé son jugement ! Un Dislike en moins !"}) })
                         .catch(error => res.status(400).json({ error }))
                 }
-                if (sauce.usersLiked.find(user => user === req.body.userId)) { // si le tableau userLiked contient l'id de l'utilisateur, et l'utilisateur veut annuler son like
+                if (sauce.usersLiked.includes(userId)) { // si le tableau userLiked contient l'id de l'utilisateur, et l'utilisateur veut annuler son like
                     Sauce.updateOne({ 
                         _id: sauceId }, {
                         $pull: { usersLiked: userId },

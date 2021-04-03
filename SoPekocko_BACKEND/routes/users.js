@@ -6,6 +6,6 @@ const verifyPassword = require('../middleware/verifyPassword');
 
 // Routes de l'API "user"
 router.post('/signup', verifyPassword, userCtrl.createUser);
-router.post('/login', userCtrl.loginUser);
+router.post('/login', verifyPassword, userCtrl.loginUser);
 
 module.exports = router;
