@@ -1,5 +1,6 @@
 const express = require('express');                 // importation du package "express": node.js web framework
 const bodyParser = require('body-parser');          // importation du package "body-parser": parse incoming request bodies in a middleware before handlers, available under the req.body property.
+const cookieParser = require("cookie-parser");      // importation du package "cookie-parser": pour lire les cookies
 const mongoose = require('mongoose');               // importation du package "mongoose": ODM, a MongoDB object modeling tool designed to work in an asynchronous environment. Mongoose supports both promises and callbacks.
 const helmet = require('helmet');                   // importation du package "helmet": 13 middleware pour sécuriser les données et les connexions.
 const path = require('path');                       // importation du package "path": provides a way of working with directories and file paths.
@@ -11,7 +12,7 @@ const toobusy = require("toobusy-js");              // importation du package "t
 const app = express();
 
 const rateLimiter = rateLimit({         
-    windowMs : 60 * 1000, 
+    windowMs : 25 * 60 * 1000, 
     max: 5, 
     message: "Vous avez dépassé le nombre maximal de tentatives, merci de réessayer ultérieurement."
 })
@@ -21,13 +22,15 @@ app.use("/api/auth", rateLimiter);
 app.use(cors({origin: 'http://localhost:4200'}));   // Sécurisation CORS: localhost:4200
 
 // connection à la base de données
-mongoose.connect(process.env.MDB,   // afin de se connecter, mongoose va aller chercher les variables nécessaires dans le fichier ".env".
-    { useNewUrlParser: true, useUnifiedTopology: true })
-.then(() => console.log('Connexion à MongoDB Atlas réussie !'))
-.catch((error) => {
-    console.log('Impossible de se connecter à MongoDB Atlas !');
-    console.error(error);
-});
+mongoose
+    .connect("mongodb+srv://" + process.env.DB_USER + ":" + process.env.DB_PASS + "@" + process.env.DB_HOST, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+        useCreateIndex: true,
+        useFindAndModify: false,
+    })
+    .then(() => console.log("Connexion à MongoDB réussie !"))
+    .catch(() => console.log("Connexion à MongoDB échouée !"));
 
 // Headers qui configure les actions à implémenter CORS
 app.use((req, res, next) => {
@@ -69,6 +72,9 @@ app.use(helmet());
 
 // Extraction de l'objet JSON des requètes entrantes
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use(cookieParser());
 
 // Importation des routes pour "sauces" et "users", du dossier "routes"
 const saucesRoutes = require('./routes/sauces');

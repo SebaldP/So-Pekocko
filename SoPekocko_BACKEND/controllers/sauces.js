@@ -41,25 +41,31 @@ exports.createSauce = (req, res, next) => {
 exports.modifySauce = (req, res, next) => {
     let sauceObject = {};
     if (req.file) {
+        sauceObject = {
+            ...JSON.parse(req.body.sauce),
+            imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`,
+        }
         Sauce.findOne({
             _id: req.params.id
         }).then((sauce) => {
           // On supprime l'ancienne image du serveur
             const filename = sauce.imageUrl.split('/images/')[1]
-            fs.unlinkSync(`images/${filename}`)
-        }),
-        sauceObject = {
-            ...JSON.parse(req.body.sauce),
-            imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`,
-        }
+            fs.unlinkSync(`images/${filename}`,
+            Sauce.updateOne({ _id: req.params.id }, { ...sauceObject, _id: req.params.id })
+            .then(() => res.status(200).json({ message: 'Sauce modifiée !'}))
+            .catch(() => res.status(500).send(new Error('Erreur dans la base de donnée!')))
+            )
+        })
+        // Si on ne peut accéder à la sauce, renvoyez une erreur serveur 500.
+        .catch(() => res.status(500).send(new Error('Erreur dans la base de donnée!')));;
     } else {
         sauceObject = {
             ...req.body
         }
+        Sauce.updateOne({ _id: req.params.id }, { ...sauceObject, _id: req.params.id })
+        .then(() => res.status(200).json({ message: 'Sauce modifiée !'}))
+        .catch(() => res.status(500).send(new Error('Erreur dans la base de donnée!')));
     }
-    Sauce.updateOne({ _id: req.params.id }, { ...sauceObject, _id: req.params.id })
-    .then(() => res.status(200).json({ message: 'Sauce modifiée !'}))
-    .catch(() => res.status(500).send(new Error('Erreur dans la base de donnée!')));
 };
 
 exports.deleteSauce = (req, res, next) => {
